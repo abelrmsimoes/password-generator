@@ -33,24 +33,26 @@ def generate_password():
                 # If no, input the desired password length
                 length = int(
                     input(
-                        "Type the length of the password: (We recommend at least 8 characters) "
+                        "Type the length of the password (We recommend at least 8 characters): "
                     )
                 )
 
-            qty = int(input("Type the quantity of passwords: "))
+            quantity = int(input("Type the quantity of passwords: "))
 
         except ValueError:
             print("Invalid value, try again.")
 
-        for _ in range(0, qty):
+        for _ in range(0, quantity):
             generated_password = ""
             if generate_string_password == "Y":
                 # Generate password based on user input string
                 for _ in range(length - len(string_password)):
                     passchar = random.choice(char)
                     generated_password += passchar
-                    string_password, percent = password_from_string(string_password)
-                generated_password = f"{generated_password[:len(generated_password) // 2]}{randomize_uppercase(string_password, percent)}{generated_password[len(generated_password) // 2:]}"
+                    converted_string_password, percent = password_from_string(
+                        string_password
+                    )
+                generated_password = f"{generated_password[:len(generated_password) // 2]}{randomize_uppercase(converted_string_password, percent)}{generated_password[len(generated_password) // 2:]}"
             else:
                 # Generate a random password
                 for _ in range(length):
@@ -62,7 +64,7 @@ def generate_password():
 
             # Print the generated password and keyboard side count
             print(
-                f"Password: {generated_password}\n{keyboard_side_count(generated_password)}"
+                f"\nPassword: {generated_password}\n{keyboard_side_count(generated_password)}"
             )
         break
 
@@ -87,22 +89,23 @@ def remove_accents(string):
 # Function to create part of password based on a given string
 def password_from_string(string):
     replace = {
-        "a": "@",
-        "c": "(",
-        "d": ")",
-        "e": "3",
-        "g": "9",
-        "h": "#",
-        "i": "!",
-        "l": "1",
-        "o": "0",
-        "s": "$",
-        "t": "7",
-        "z": "2",
+        "a": ["@", "4", "a", "A"],
+        "c": ["(", "[", "{", "<", "c", "C"],
+        "d": [")", "]", "}", ">", "d", "D"],
+        "e": ["3", "&", "e", "E"],
+        "g": ["9", "g", "G"],
+        "h": ["#", "h", "H"],
+        "i": ["!", "i", "I"],
+        "l": ["1", "l", "L"],
+        "o": ["0", "o", "O"],
+        "s": ["$", "5", "s", "S"],
+        "t": ["7", "t", "T"],
+        "z": ["2", "z", "Z"],
     }
 
     percent = int(round(len(string) * 0.3, 0))
     chars_present_in_replace = [char for char in string if char in replace.keys()]
+
     if len(chars_present_in_replace) >= percent:
         chars_to_replace = chars_present_in_replace
     else:
@@ -111,8 +114,11 @@ def password_from_string(string):
     string_list = list(string)
 
     for char in chars_to_replace:
-        index = string.index(char)
-        string_list[index] = replace[char]
+        index = string_list.index(char)
+        replacement_options = replace[char]
+        random.shuffle(replacement_options)
+        replacement = random.choice(replacement_options)
+        string_list[index] = replacement
 
     string = "".join(string_list)
 
@@ -149,7 +155,7 @@ def keyboard_side_count(string):
         else f"Left side is heavier"
         if left_side_percent > right_side_percent
         else f"Right side is heavier"
-    ) + f" (Left side: {left_side_percent}% vs Right side: {right_side_percent}%)\n"
+    ) + f" (Left side: {left_side_percent}% vs Right side: {right_side_percent}%)"
 
 
 # Entry point of the script
