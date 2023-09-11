@@ -1,3 +1,4 @@
+import re
 import random
 
 
@@ -63,9 +64,9 @@ def generate_password():
                 )
 
             # Print the generated password and keyboard side count
-            print(
-                f"\nPassword: {generated_password}\n{keyboard_side_count(generated_password)}"
-            )
+            print(f"\nPassword: {generated_password}")
+            print(password_check(generated_password))
+            print(keyboard_side_count(generated_password))
         break
 
 
@@ -89,18 +90,19 @@ def remove_accents(string):
 # Function to create part of password based on a given string
 def password_from_string(string):
     replace = {
-        "a": ["@", "4", "a", "A"],
-        "c": ["(", "[", "{", "<", "c", "C"],
-        "d": [")", "]", "}", ">", "d", "D"],
-        "e": ["3", "&", "e", "E"],
-        "g": ["9", "g", "G"],
-        "h": ["#", "h", "H"],
-        "i": ["!", "i", "I"],
-        "l": ["1", "l", "L"],
-        "o": ["0", "o", "O"],
-        "s": ["$", "5", "s", "S"],
-        "t": ["7", "t", "T"],
-        "z": ["2", "z", "Z"],
+        # Special characters that can be replaced
+        "a": ["@", "4", "a"],
+        "c": ["(", "[", "{", "<", "c"],
+        "d": [")", "]", "}", ">", "d"],
+        "e": ["3", "&", "e"],
+        "g": ["9", "g"],
+        "h": ["#", "h"],
+        "i": ["!", "i"],
+        "l": ["1", "l"],
+        "o": ["0", "o"],
+        "s": ["$", "5", "s"],
+        "t": ["7", "t"],
+        "z": ["2", "z"],
     }
 
     percent = int(round(len(string) * 0.3, 0))
@@ -137,8 +139,8 @@ def randomize_uppercase(string, percent):
 
 # Function to count characters on the left and right sides of the keyboard
 def keyboard_side_count(string):
-    left_side = "\"'1!¹2@²3#³4$£5%¢6¨¬qwertasdfg\\|zxcv"
-    right_side = "7&8*9(0)-_=+§yuiop[{hjklç]}bnm,<.>;:/?"
+    left_side = "\"'1!¹2@²3#³4$£5%¢6¨¬qwertasdfg\\|zxcvb"
+    right_side = "7&8*9(0)-_=+§yuiop[{hjklç]}nm,<.>;:/?"
 
     total_chars = len(string)
     total_left_side = sum([1 for char in string.lower() if char in left_side])
@@ -156,6 +158,41 @@ def keyboard_side_count(string):
         if left_side_percent > right_side_percent
         else f"Right side is heavier"
     ) + f" (Left side: {left_side_percent}% vs Right side: {right_side_percent}%)"
+
+
+# Function to check password strength
+def password_check(password):
+    password_scores = {
+        0: "Horrible",
+        1: "Weak",
+        2: "Medium",
+        3: "Strong",
+        4: "Very Strong",
+    }
+
+    password_strength = dict.fromkeys(
+        ["has_upper", "has_lower", "has_num", "has_symbols"], False
+    )
+
+    # Check if password has uppercase, lowercase, numbers and symbols
+    if re.search(r"[A-Z]", password):
+        password_strength["has_upper"] = True
+    if re.search(r"[a-z]", password):
+        password_strength["has_lower"] = True
+    if re.search(r"[0-9]", password):
+        password_strength["has_num"] = True
+    if re.search(r"[!@#$%^&*()_+-=\[\]{};:\|,.<>\/?]", password):
+        password_strength["has_symbols"] = True
+
+    score = len([b for b in password_strength.values() if b])
+
+    # Check password length
+    if len(password) < 8:
+        score -= 2
+    elif len(password) < 12:
+        score -= 1
+
+    return f"Password is {password_scores[score]}"
 
 
 # Entry point of the script
